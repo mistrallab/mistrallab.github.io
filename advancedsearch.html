@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Advanced Search</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    
+    <div class="container">
+        <h2>Advanced Search</h2>
+        <p>Note: You may search multiple nodes by using: rgx:(?=.*(NODE1))(?=.*(NODE2))</p>
+        <p class="text-right"><a href="index.html">Back</a></p>
+        <div id="table"></div>
+    </div>
+
+    <script src="scripts/tablefilter/tablefilter.js"></script>
+
+    <script>
+
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                var myObj = JSON.parse(this.responseText);
+                var res = [];
+                var tbl = '<table id="myTable">';
+                tbl += '<thead><tr><th>Case Id</th><th>Related Cancer</th><th>Edge Count</th><th>Node Count</th><th>Rewiring Score</th><th>Nodes</th></tr></thead>';
+                tbl += '<tbody>';
+                for (x in myObj) {
+                    tbl += '<td><a href="htmls/' + myObj[x].Html_file + '">' + myObj[x].Case_Id + '<a/></td>';
+                    tbl += '<td>' + myObj[x].Related_Cancer + '</td>';
+                    tbl += '<td>' + myObj[x].Edge_Count + '</td>';
+                    tbl += '<td>' + myObj[x].Node_Count + '</td>';
+                    tbl += '<td>' + myObj[x].Rewiring_Score + '</td>'
+                    var nodes = '';
+                    for (p in myObj[x].Node_List) {
+                        nodes += myObj[x].Node_List[p];
+                        nodes += ',';
+                    }
+                    nodes = nodes.slice(0, -1);
+                    tbl += '<td style="word-wrap: break-word">' + nodes + '</td>'
+                    tbl += '</tr>';
+                }
+
+                tbl += '</tbody></table>';
+                document.getElementById("table").innerHTML = tbl;
+
+                var filtersConfig = {
+                    base_path: 'scripts/tablefilter/',
+                    state: {
+                        types: ['local_storage'],
+                        filters: true,
+                        page_number: true,
+                        page_length: true,
+                        sort: true,
+                        columns_visibility: true,
+                        filters_visibility: true
+                    },
+                    paging: {
+                        results_per_page: ['Records: ', [10, 25, 50, 100]]
+                    },
+                    alternate_rows: true,
+                    btn_reset: true,
+                    rows_counter: true,
+                    loader: true,
+                    status_bar: true,
+                    col_widths: [
+                        '140px', '80px', '80px', '80px', '80px', '850px'
+
+                    ],
+                    col_types: [
+                        'string', 'string', 'number', 'number', 'number', 'string'
+                    ],
+                    extensions: [{
+                        name: 'sort'
+                    }, {
+                        name: 'colsVisibility',
+                        text: 'Hide columns:',
+                        enable_tick_all: true,
+                        btn_target_id: 'colsBtn'
+                    }, {
+                        name: 'filtersVisibility',
+                        target_id: 'fltsBtn'
+                    }]
+                };
+                var tf = new TableFilter('myTable', filtersConfig);
+                tf.init();
+            }
+        };
+        xmlhttp.open("GET", "data.json", true);
+        xmlhttp.send();
+    </script>
+
+</body>
+
+</html>
